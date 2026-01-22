@@ -49,7 +49,7 @@ import java.util.Map;
 class PasswordRetriever implements AutoCloseable {
   public static final String SPEC_STDIN = "stdin";
 
-  private static final Charset CONSOLE_CHARSET = getConsoleEncoding();
+  private static final Charset CONSOLE_CHARSET = Charset.defaultCharset();
 
   private final Map<File, InputStream> mFileInputStreams = new HashMap<>();
 
@@ -60,7 +60,7 @@ class PasswordRetriever implements AutoCloseable {
    * resulting list is guaranteed to contain at least one element.
    */
   private static List<char[]> getPasswords(char[] pwd) {
-    List<char[]> passwords = new ArrayList<>(3);
+    List<char[]> passwords = new ArrayList<>(2);
     addPasswords(passwords, pwd);
     return passwords;
   }
@@ -73,7 +73,7 @@ class PasswordRetriever implements AutoCloseable {
    * @param encodings character encodings in which the password is encoded in {@code encodedPwd}.
    */
   private static List<char[]> getPasswords(byte[] encodedPwd, Charset... encodings) {
-    List<char[]> passwords = new ArrayList<>(4);
+    List<char[]> passwords = new ArrayList<>(3);
 
     for (Charset encoding : encodings) {
       // Decode password and add it and its variants to the list
@@ -103,15 +103,6 @@ class PasswordRetriever implements AutoCloseable {
       char[] encodedPwd = castBytesToChars(encodePassword(pwd, Charset.defaultCharset()));
       addPassword(passwords, encodedPwd);
     } catch (IOException ignored) {
-    }
-
-    // Password encoded using console character encoding and upcast into char[]
-    if (!CONSOLE_CHARSET.equals(Charset.defaultCharset())) {
-      try {
-        char[] encodedPwd = castBytesToChars(encodePassword(pwd, CONSOLE_CHARSET));
-        addPassword(passwords, encodedPwd);
-      } catch (IOException ignored) {
-      }
     }
   }
 

@@ -7,6 +7,7 @@ import com.tencent.mm.resourceproguard.Main
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -15,8 +16,13 @@ import org.gradle.api.tasks.TaskAction
  * @author Sim Sun (sunsj1231@gmail.com)
  */
 class AndResGuardTask extends DefaultTask {
+  @Internal
   AndResGuardExtension configuration
+  
+  @Internal
   def android
+  
+  @Internal
   def buildConfigs = []
 
   AndResGuardTask() {
@@ -49,20 +55,33 @@ class AndResGuardTask extends DefaultTask {
             outputFile = outputFile ?: output.outputFile
           }
 
-          def variantInfo
-          if (variant.variantData.hasProperty("variantConfiguration")) {
-            variantInfo = variant.variantData.variantConfiguration
+          // 获取应用ID
+          def applicationId
+          if (variant.metaClass.respondsTo(variant, "getApplicationId")) {
+            applicationId = variant.applicationId
+          } else if (variant.variantData.hasProperty("variantConfiguration")) {
+            def variantInfo = variant.variantData.variantConfiguration
+            applicationId = variantInfo.applicationId instanceof Property
+                ? variantInfo.applicationId.get()
+                : variantInfo.applicationId
           } else {
-            variantInfo = variant.variantData.variantDslInfo
+            applicationId = variant.applicationId
           }
 
-          def applicationId = variantInfo.applicationId instanceof Property
-              ? variantInfo.applicationId.get()
-              : variantInfo.applicationId
+          // 获取签名配置
+          def signingConfig
+          if (variant.metaClass.respondsTo(variant, "getSigningConfig")) {
+            signingConfig = variant.signingConfig
+          } else if (variant.variantData.hasProperty("variantConfiguration")) {
+            def variantInfo = variant.variantData.variantConfiguration
+            signingConfig = variantInfo.signingConfig
+          } else {
+            signingConfig = null
+          }
 
           buildConfigs << new BuildInfo(
               outputFile,
-              variantInfo.signingConfig,
+              signingConfig,
               applicationId,
               variant.buildType.name,
               variant.productFlavors,
@@ -92,6 +111,7 @@ class AndResGuardTask extends DefaultTask {
     return "${file.parent}/AndResGuard_${fileName}/"
   }
 
+  @Internal
   def getZipAlignPath() {
     return "${android.getSdkDirectory().getAbsolutePath()}/build-tools/${android.buildToolsVersion}/zipalign"
   }
