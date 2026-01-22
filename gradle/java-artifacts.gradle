@@ -1,33 +1,146 @@
-apply plugin: 'maven-publish'
-
-sourceCompatibility = rootProject.ext.javaVersion
-targetCompatibility = rootProject.ext.javaVersion
-
-task sourcesJar(type: Jar) {
-  from sourceSets.main.java.srcDirs
-  classifier = 'sources'
+// Apply maven-publish plugin if not already applied
+if (!project.plugins.hasPlugin('maven-publish')) {
+    project.plugins.apply('maven-publish')
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
-  from javadoc.destinationDir
-}
+afterEvaluate {
+    publishing {
 
-artifacts {
-  archives javadocJar
-  archives sourcesJar
-}
+        publications {
+            release(MavenPublication) {
 
-publishing {
-  publications {
-    ResguardPub(MavenPublication) {
-      from components.java
-      groupId = group
-      artifactId = POM_ARTIFACT_ID
-      version = version
+                groupId = groupID
+                artifactId = aarId
+                version = versionName
+
+                // Java / AS Plugin
+                from components.java
+
+                // Add SevenZip executables if this is the SevenZip module
+                if (project.name == "SevenZip") {
+                    // Only add artifacts for files that actually exist
+                    def executableDir = project.file("executable")
+                    
+                    // Linux x86 32-bit
+                    def linuxX86_32 = executableDir.toPath().resolve("SevenZip-linux-x86_32.exe").toFile()
+                    if (linuxX86_32.exists()) {
+                        artifact(linuxX86_32) {
+                            classifier "linux-x86_32"
+                            extension "exe"
+                        }
+                    }
+                    
+                    // Linux x86 64-bit
+                    def linuxX86_64 = executableDir.toPath().resolve("SevenZip-linux-x86_64.exe").toFile()
+                    if (linuxX86_64.exists()) {
+                        artifact(linuxX86_64) {
+                            classifier "linux-x86_64"
+                            extension "exe"
+                        }
+                    }
+                    
+                    // Windows x86 32-bit
+                    def windowsX86_32 = executableDir.toPath().resolve("SevenZip-windows-x86_32.exe").toFile()
+                    if (windowsX86_32.exists()) {
+                        artifact(windowsX86_32) {
+                            classifier "windows-x86_32"
+                            extension "exe"
+                        }
+                    }
+                    
+                    // Windows x86 64-bit
+                    def windowsX86_64 = executableDir.toPath().resolve("SevenZip-windows-x86_64.exe").toFile()
+                    if (windowsX86_64.exists()) {
+                        artifact(windowsX86_64) {
+                            classifier "windows-x86_64"
+                            extension "exe"
+                        }
+                    }
+                    
+                    // macOS x86 64-bit
+                    def osxX86_64 = executableDir.toPath().resolve("SevenZip-osx-x86_64.exe").toFile()
+                    if (osxX86_64.exists()) {
+                        artifact(osxX86_64) {
+                            classifier "osx-x86_64"
+                            extension "exe"
+                        }
+                    }
+                }
+
+                pom {
+                    name.set(aarId)
+                    description.set("Android Studio Plugin")
+                }
+            }
+        }
+
+        repositories {
+
+            // 1️⃣ ~/.m2/repository
+            mavenLocal()
+
+            // 2️⃣ 自定义本地仓库 或 Nexus
+            maven {
+                name = "customRepo"
+
+                url = publishToServer
+                        ? uri(REPOSITORY_URL)
+                        : uri(localPath)
+
+                if (publishToServer) {
+                    credentials {
+                        username = NEXUS_USERNAME
+                        password = NEXUS_PASSWORD
+                    }
+                }
+            }
+        }
     }
-  }
 }
 
-task buildAndPublishLocalMaven(dependsOn: ['build', 'publishResguardPublicationToMavenLocal']) {}
+tasks.register("cleanLocalPlugin") {
+    group = "publishing"
+    description = "删除 ~/.m2/repository 中的 ASPlugin"
 
+    doLast {
+        def groupPath = groupID.replace('.', '/')
+        def target = file("${System.getProperty('user.home')}/.m2/repository/${groupPath}/${aarId}/${versionName}")
+
+        if (target.exists()) {
+            println "🗑 删除: $target"
+            target.deleteDir()
+        } else {
+            println "ℹ 未找到本地 artifact"
+        }
+    }
+}
+
+tasks.register("publishToLocalRepo") {
+    group = "publishing"
+    description = "发布到 ~/.m2/repository"
+
+    dependsOn("publishReleasePublicationToMavenLocal")
+
+    doLast {
+        println "✅ 已发布到:"
+        println "~/.m2/repository/${groupID.replace('.', '/')}/${aarId}/${versionName}"
+    }
+}
+
+tasks.register("publishToLocalRepoCustom") {
+    group = "publishing"
+    description = "发布到自定义本地 Maven 仓库"
+
+    dependsOn("publishReleasePublicationToCustomRepoRepository")
+
+    doLast {
+        def target = file("${localPath}/${groupID.replace('.', '/')}/${aarId}/${versionName}")
+
+        if (target.exists()) {
+            println "✅ 已发布到自定义仓库:"
+            println target.absolutePath
+        } else {
+            println "⚠️ 发布完成，但未找到目录"
+        }
+    }
+}

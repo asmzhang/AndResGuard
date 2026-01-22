@@ -2,14 +2,27 @@ apply plugin: 'java'
 
 
 
-version rootProject.ext.VERSION_NAME
-group rootProject.ext.GROUP
+//version rootProject.ext.VERSION_NAME
+//group rootProject.ext.GROUP
+
+ext {
+    // artifactId
+    aarId = "AndResGuard-core"
+    // snapshot version use x.x.x-snapshot, release version use x.x.x
+    versionName = rootProject.ext.versionName
+    // 默认 false, true 代表推远程maven仓
+    publishToServer = rootProject.ext.publishToServer
+    groupID = rootProject.ext.groupID
+    // aar local path
+    localPath = '../repo'
+}
+
 
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
-  compile 'com.android.tools.build:gradle:4.1.2'
-  compile 'commons-io:commons-io:2.6'
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  implementation 'commons-io:commons-io:2.6'
+  implementation 'com.android.tools.build:apksig:7.4.2'
 }
 
 sourceSets {
@@ -22,4 +35,3 @@ sourceSets {
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 apply from: rootProject.file('gradle/java-artifacts.gradle')
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

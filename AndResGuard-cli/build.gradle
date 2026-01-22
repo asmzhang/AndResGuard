@@ -2,13 +2,25 @@ apply plugin: 'java'
 
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
-version rootProject.ext.VERSION_NAME
-group rootProject.ext.GROUP
+//version rootProject.ext.VERSION_NAME
+//group rootProject.ext.GROUP
+
+ext {
+    // artifactId
+    aarId = "AndResGuard-cli"
+    // snapshot version use x.x.x-snapshot, release version use x.x.x
+    versionName = rootProject.ext.versionName
+    // 默认 false, true 代表推远程maven仓
+    publishToServer = rootProject.ext.publishToServer
+    groupID = rootProject.ext.groupID
+    // aar local path
+    localPath = '../repo'
+}
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
-  //compile group: 'com.tencent.mm', name: 'AndResGuard-core', version: version
-  compile project(':AndResGuard-core')
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  //implementation group: 'com.tencent.mm', name: 'AndResGuard-core', version: version
+  implementation project(':AndResGuard-core')
 }
 
 sourceSets {
@@ -22,12 +34,12 @@ sourceSets {
 jar {
   manifest {
     attributes 'Main-Class': 'com.tencent.mm.resourceproguard.cli.CliMain'
-    attributes 'Manifest-Version': version
-    attributes "Jar-Version": "${ANDRESGUARD_VESSION}"
+    attributes 'Manifest-Version': '1.0'
+    attributes "Jar-Version": versionName
     attributes "Build-Time": releaseTime()
   }
   from {
-    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
 }
 
@@ -44,3 +56,5 @@ def releaseTime() {
 }
 
 defaultTasks 'buildJar'
+
+apply from: rootProject.file('gradle/java-artifacts.gradle')

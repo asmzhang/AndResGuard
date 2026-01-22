@@ -2,19 +2,17 @@
 buildscript {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:4.1.2'
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-    classpath 'com.ofg:uptodate-gradle-plugin:1.6.2'
+    classpath 'com.android.tools.build:gradle:7.4.2'
   }
 }
 
 allprojects {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
   }
   tasks.withType(JavaCompile) {
     sourceCompatibility = rootProject.ext.javaVersion
@@ -28,10 +26,13 @@ allprojects {
 }
 
 ext {
-  javaVersion = JavaVersion.VERSION_1_8
+  javaVersion = JavaVersion.VERSION_11
 
-  GROUP = 'com.tencent.mm'
-  VERSION_NAME = "${ANDRESGUARD_VESSION}"
+//  GROUP = 'com.asmhznag.mm'
+//    VERSION_NAME = "${ANDRESGUARD_VESSION}"
+    groupID = "com.asmhznag.AndResGuard"
+
+    versionName = "1.0.0"
 
   POM_PACKAGING = "pom"
   POM_DESCRIPTION = "Android Resource Proguard Core Lib"
@@ -49,4 +50,27 @@ ext {
 
   BINTRAY_LICENCE = ["Apache-2.0"]
   BINTRAY_ORGANIZATION = "wemobiledev"
+
+    localPath = './repo'
+
+    publishToServer = false
+//    # maven info
+    REPOSITORY_URL="***"
+            GROUP_LIB="com.xzluo.lib"
+    NEXUS_USERNAME="***"
+            NEXUS_PASSWORD="***"
 }
+
+//ext {
+//    javaVersion = JavaVersion.VERSION_17
+//
+//    POM_PACKAGING = "pom"
+//    POM_DESCRIPTION = "Android Resource Proguard Core Lib"
+//
+//    versionName = "1.0.0"
+//    // 默认 false, true 代表推远程maven仓
+//    publishToServer = false
+//    groupID = "com.asmzhang.AndResGuard"
+//    // aar local path
+//    localPath = './repo'
+//}

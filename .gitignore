@@ -40,3 +40,8 @@ node_modules/
 classes
 AndResGuard-example/true
 final.apk
+
+**/repo
+**/build
+**/bin
+**/.cxx

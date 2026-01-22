@@ -1,0 +1,168 @@
+//plugins {
+//    alias(libs.plugins.android.application)
+//}
+apply plugin: 'com.android.application'
+
+buildscript {
+    repositories {
+        maven {
+            url uri('../../repo')
+        }
+        mavenLocal()
+        google()
+        jcenter()
+    }
+    dependencies {
+        // The Fabric Gradle plugin uses an open ended version to react
+        // quickly to Android tooling updates
+//    classpath("com.tencent.mm:AndResGuard-gradle-plugin:${ANDRESGUARD_VERSION}") { changing = true }
+        classpath("com.asmhznag.AndResGuard:AndResGuard-gradle-plugin:${ANDRESGUARD_VERSION}") { changing = true }
+
+    }
+}
+
+apply plugin: 'AndResGuard'
+
+andResGuard {
+    // mappingFile = file("./resource_mapping.txt")
+    mappingFile = null
+    use7zip = false
+    useSign = false
+    // 打开这个开关，会keep住所有资源的原始路径，只混淆资源的名字
+    keepRoot = false
+    // 设置这个值，会把arsc name列混淆成相同的名字，减少string常量池的大小
+    fixedResName = "arg"
+    // 打开这个开关会合并所有哈希值相同的资源，但请不要过度依赖这个功能去除去冗余资源
+    mergeDuplicatedRes = true
+    whiteList = [
+            // for your icon
+            "R.mipmap.ic_launcher",
+            // for fabric
+            "R.string.com.crashlytics.*",
+            // for google-services
+            "R.string.google_app_id",
+            "R.string.gcm_defaultSenderId",
+            "R.string.default_web_client_id",
+            "R.string.ga_trackingId",
+            "R.string.firebase_database_url",
+            "R.string.google_api_key",
+            "R.string.google_crash_reporting_api_key",
+            "R.layout.app_ops_dialog_custom"
+    ]
+    compressFilePattern = [
+            "*.png",
+            "*.jpg",
+            "*.jpeg",
+            "*.gif",
+    ]
+    sevenzip {
+//        artifact = 'com.tencent.mm:SevenZip:1.2.21'
+        artifact = 'com.asmhznag.AndResGuard:sevenzip:1.0.0'
+        //path = "/usr/local/bin/7za"
+    }
+
+    /**
+     * 可选： 如果不设置则会默认覆盖assemble输出的apk
+     **/
+     finalApkBackupPath = "${project.buildDir}/outputs/apk/release/app4-release-andresguard.apk"
+
+    /**
+     * 可选: 指定v1签名时生成jar文件的摘要算法
+     * 默认值为"SHA-1"
+     **/
+    // digestalg = "SHA-256"
+}
+
+
+repositories {
+    maven {
+        url uri('../../repo')
+    }
+    mavenLocal()
+    jcenter()
+    maven { url 'https://maven.fabric.io/public' }
+}
+
+android {
+    namespace 'top.niunaijun.blackobfuscator.myapplication'
+//    compileSdk {
+//        version = release(36)
+//    }
+
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "top.niunaijun.blackobfuscator.myapplication"
+        minSdk 24
+//        targetSdk 36
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../keystore test/testKey.jks")
+            storePassword "testtest"
+            keyAlias "test"
+            keyPassword "admin@test"
+            v2SigningEnabled true
+        }
+
+        debug {
+            storeFile file("../keystore test/debug.keystore")
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
+    buildFeatures {
+        viewBinding true
+    }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+}
+
+dependencies {
+//    implementation libs.appcompat
+//    implementation libs.material
+//    implementation libs.constraintlayout
+
+
+//    implementation libs.androidx.core.ktx
+//    implementation libs.androidx.appcompat
+//    implementation libs.material
+//    implementation libs.androidx.constraintlayout
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.6.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+//    testImplementation libs.junit
+//    androidTestImplementation libs.ext.junit
+//    androidTestImplementation libs.espresso.core
+}
