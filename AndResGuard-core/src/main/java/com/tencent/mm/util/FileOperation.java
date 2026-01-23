@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class FileOperation {
@@ -144,6 +145,96 @@ public class FileOperation {
     }
     return file;
   }
+
+//     @SuppressWarnings("rawtypes")
+//     public static HashMap<String, Integer> unZipAPk(String fileName, String filePath) throws IOException {
+//         long start = System.currentTimeMillis();
+
+//         System.out.printf("[UnZip] Start unzip apk\n");
+//         System.out.printf("[UnZip] apk    : %s\n", fileName);
+//         System.out.printf("[UnZip] outDir : %s\n", filePath);
+
+//         checkDirectory(filePath);
+
+//         ZipFile zipFile = new ZipFile(fileName);
+//         Enumeration emu = zipFile.entries();
+//         HashMap<String, Integer> compress = new HashMap<>();
+
+//         int fileCount = 0;
+
+//         try {
+//             while (emu.hasMoreElements()) {
+//                 ZipEntry entry = (ZipEntry) emu.nextElement();
+//                 String entryName = entry.getName();
+
+//                 // 统一路径分隔符
+//                 String compatPath = entryName.replace("\\", "/");
+//                 compress.put(compatPath, entry.getMethod());
+
+//                 if (entry.isDirectory()) {
+//                     File dir = new File(filePath, compatPath);
+//                     if (!dir.exists() && !dir.mkdirs()) {
+// //                        System.out.printf("[UnZip][WARN] mkdir failed: %s\n", dir.getAbsolutePath());
+//                     }
+//                     continue;
+//                 }
+
+//                 System.out.printf(
+//                         "[UnZip] entry=%s method=%s size=%d compressed=%d\n",
+//                         compatPath,
+//                         entry.getMethod() == ZipEntry.STORED ? "STORED" : "DEFLATED",
+//                         entry.getSize(),
+//                         entry.getCompressedSize()
+//                 );
+
+//                 File outFile = new File(filePath, compatPath);
+//                 File parent = outFile.getParentFile();
+//                 if (parent != null && !parent.exists() && !parent.mkdirs()) {
+//                     System.out.printf("[UnZip][WARN] mkdir parent failed: %s\n", parent.getAbsolutePath());
+//                 }
+
+//                 try (
+//                         BufferedInputStream bis = new BufferedInputStream(zipFile.getInputStream(entry));
+//                         FileOutputStream fos = new FileOutputStream(outFile);
+//                         BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER)
+//                 ) {
+//                     byte[] buf = new byte[BUFFER];
+//                     int len;
+//                     long written = 0;
+
+//                     while ((len = bis.read(buf)) != -1) {
+//                         bos.write(buf, 0, len);
+//                         written += len;
+//                     }
+//                     bos.flush();
+
+//                     long declaredSize = entry.getSize();
+//                     if (declaredSize >= 0 && written != declaredSize) {
+//                         throw new IOException(String.format(
+//                                 "[UnZip][ERROR] %s actual=%d declared=%d",
+//                                 compatPath, written, declaredSize
+//                         ));
+//                     }
+
+//                     fileCount++;
+//                 } catch (Throwable t) {
+//                     System.out.printf(
+//                             "[UnZip][ERROR] fail entry=%s err=%s\n",
+//                             compatPath, t.getMessage()
+//                     );
+//                     throw t;
+//                 }
+//             }
+//         } finally {
+//             zipFile.close();
+//         }
+
+//         long cost = System.currentTimeMillis() - start;
+//         System.out.printf("[UnZip] Done, files=%d, cost=%dms\n", fileCount, cost);
+
+//         return compress;
+//     }
+
 
   @SuppressWarnings("rawtypes")
   public static HashMap<String, Integer> unZipAPk(String fileName, String filePath) throws IOException {
