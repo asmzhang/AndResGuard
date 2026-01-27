@@ -1,30 +1,92 @@
+//apply plugin: 'groovy'
+//
+//version rootProject.ext.versionName
+//group rootProject.ext.groupID
+//
+//dependencies {
+//  implementation gradleApi()
+//  implementation localGroovy()
+//  //implementation group: 'com.tencent.mm', name: 'AndResGuard-core', version: version
+//  implementation 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
+//  implementation project(':AndResGuard-core')
+//}
+//
+//repositories {
+//  mavenCentral()
+//}
+//
+//ext {
+//    // artifactId
+//    aarId = "AndResGuard-gradle-plugin"
+//    // snapshot version use x.x.x-snapshot, release version use x.x.x
+//    versionName = rootProject.ext.versionName
+//    // 默认 false, true 代表推远程maven仓
+//    publishToServer = rootProject.ext.publishToServer
+//    groupID = rootProject.ext.groupID
+//    // aar local path
+//    localPath = '../repo'
+//}
+//
+//apply from: rootProject.file('gradle/java-artifacts.gradle')
+
+
+
+
+
 apply plugin: 'groovy'
+apply plugin: 'java'
 
-version rootProject.ext.versionName
-group rootProject.ext.groupID
-
-dependencies {
-  implementation gradleApi()
-  implementation localGroovy()
-  //implementation group: 'com.tencent.mm', name: 'AndResGuard-core', version: version
-  implementation 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
-  implementation project(':AndResGuard-core')
-}
+version = rootProject.ext.versionName
+group = rootProject.ext.groupID
 
 repositories {
-  mavenCentral()
+    maven {
+        url uri('../repo')
+    }
+//    mavenCentral()
 }
 
-ext {
-    // artifactId
-    aarId = "AndResGuard-gradle-plugin"
-    // snapshot version use x.x.x-snapshot, release version use x.x.x
-    versionName = rootProject.ext.versionName
-    // 默认 false, true 代表推远程maven仓
-    publishToServer = rootProject.ext.publishToServer
-    groupID = rootProject.ext.groupID
-    // aar local path
-    localPath = '../repo'
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
+    implementation project(':AndResGuard-core')
 }
 
-apply from: rootProject.file('gradle/java-artifacts.gradle')
+/**
+ * 打包成 fat jar（不依赖 shadow 插件）
+ */
+task fatJar(type: Jar) {
+    archiveBaseName.set("AndResGuard-gradle-plugin")
+    archiveVersion.set(rootProject.ext.versionName)
+    archiveClassifier.set("")
+    destinationDirectory.set(file("$buildDir/libs"))
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes(
+                'Implementation-Title': archiveBaseName.get(),
+                'Implementation-Version': archiveVersion.get(),
+                'Built-By': System.getProperty("user.name"),
+                'Built-Date': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        )
+    }
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA',
+            'META-INF/*.MF', 'META-INF/*.txt', 'META-INF/versions/**',
+            'META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/NOTICE',
+            'META-INF/plexus/components.xml'
+}
+
+/**
+ * 让 build 也生成 fatJar
+ */
+build.dependsOn fatJar

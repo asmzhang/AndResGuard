@@ -42,13 +42,30 @@ class AndResGuardPlugin implements Plugin<Project> {
     }
   }
 
-  private static void createTask(Project project, variantName) {
-    def taskName = "resguard${variantName}"
-    if (project.tasks.findByPath(taskName) == null) {
-      def task = project.task(taskName, type: AndResGuardTask)
-      if (variantName != USE_APK_TASK_NAME) {
-        task.dependsOn "assemble${variantName}"
-      }
+//  private static void createTask(Project project, variantName) {
+//    def taskName = "resguard${variantName}"
+//    if (project.tasks.findByPath(taskName) == null) {
+//      def task = project.task(taskName, type: AndResGuardTask)
+//      if (variantName != USE_APK_TASK_NAME) {
+//        task.dependsOn "assemble${variantName}"
+//      }
+//    }
+//  }
+    private static void createTask(Project project, variantName) {
+        def taskName = "resguard${variantName}"
+
+        // 只创建一次
+        if (project.tasks.findByPath(taskName) == null) {
+            project.task(taskName, type: AndResGuardTask)
+        }
+
+        // 关键：assemble完成后执行resguard
+        def assembleTaskName = "assemble${variantName}"
+        if (project.tasks.findByPath(assembleTaskName) != null) {
+            project.tasks.named(assembleTaskName) {
+                finalizedBy taskName
+            }
+        }
     }
-  }
+
 }
