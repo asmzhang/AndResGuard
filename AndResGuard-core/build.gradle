@@ -22,7 +22,6 @@ ext {
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
   implementation 'commons-io:commons-io:2.6'
-  implementation 'com.android.tools.build:apksig:7.4.2'
   implementation project(':SevenZip')
 }
 
