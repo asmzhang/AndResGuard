@@ -76,10 +76,10 @@ if (is_resguardRelease) {
 }
 
 repositories {
-    maven {
-        url uri('../../repo')
-    }
-    mavenLocal()
+    // maven {
+    //     url uri('../../repo')
+    // }
+    // mavenLocal()
     jcenter()
     maven { url 'https://maven.fabric.io/public' }
 }
