@@ -5,10 +5,10 @@ apply plugin: 'com.android.application'
 
 buildscript {
     repositories {
-        maven {
-            url uri('../../repo')
-        }
-        mavenLocal()
+        // maven {
+        //     url uri('../../repo')
+        // }
+        // mavenLocal()
         google()
         jcenter()
     }
@@ -16,8 +16,8 @@ buildscript {
         // The Fabric Gradle plugin uses an open ended version to react
         // quickly to Android tooling updates
 //    classpath("com.tencent.mm:AndResGuard-gradle-plugin:${ANDRESGUARD_VERSION}") { changing = true }
-        classpath("com.asmhznag.AndResGuard:AndResGuard-gradle-plugin:${ANDRESGUARD_VERSION}") { changing = true }
-
+        // classpath("com.asmhznag.AndResGuard:AndResGuard-gradle-plugin:${ANDRESGUARD_VERSION}") { changing = true }
+      classpath files("../libs/AndResGuard-gradle-plugin-1.0.0.jar")
     }
 }
 
@@ -60,11 +60,7 @@ if (is_resguardRelease) {
                 "*.jpeg",
                 "*.gif",
         ]
-        sevenzip {
-//        artifact = 'com.tencent.mm:SevenZip:1.2.21'
-            artifact = 'com.asmhznag.AndResGuard:sevenzip:1.0.0'
-            //path = "/usr/local/bin/7za"
-        }
+        
 
         /**
          * 可选： 如果不设置则会默认覆盖assemble输出的apk

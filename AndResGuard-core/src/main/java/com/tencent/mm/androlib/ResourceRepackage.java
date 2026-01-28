@@ -1,14 +1,16 @@
 package com.tencent.mm.androlib;
 
-import com.tencent.mm.util.FileOperation;
-import com.tencent.mm.util.TypedValue;
-import com.tencent.mm.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.tencent.mm.util.FileOperation;
+import com.tencent.mm.util.SevenZipUtil;
+import com.tencent.mm.util.TypedValue;
+import com.tencent.mm.util.Utils;
 
 public class ResourceRepackage {
 
@@ -114,7 +116,17 @@ public class ResourceRepackage {
     String outPath = m7zipOutPutDir.getAbsoluteFile().getAbsolutePath();
     String path = outPath + File.separator + "*";
 
-    String cmd = Utils.isPresent(sevenZipPath) ? sevenZipPath : TypedValue.COMMAND_7ZIP;
+    String cmd;
+    if (Utils.isPresent(sevenZipPath)) {
+        cmd = sevenZipPath;
+    } else {
+        try {
+            cmd = SevenZipUtil.getSevenZipPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            cmd = TypedValue.COMMAND_7ZIP;
+        }
+    }
     ProcessBuilder pb = new ProcessBuilder(cmd, "a", "-tzip", mSignedWith7ZipApk.getAbsolutePath(), path, "-mx9");
     Process pro = pb.start();
 
@@ -139,7 +151,17 @@ public class ResourceRepackage {
     }
     storedParentName = storedParentName + File.separator + "*";
     //极限压缩
-    String cmd = Utils.isPresent(sevenZipPath) ? sevenZipPath : TypedValue.COMMAND_7ZIP;
+    String cmd;
+    if (Utils.isPresent(sevenZipPath)) {
+        cmd = sevenZipPath;
+    } else {
+        try {
+            cmd = SevenZipUtil.getSevenZipPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            cmd = TypedValue.COMMAND_7ZIP;
+        }
+    }
     ProcessBuilder pb = new ProcessBuilder(cmd,
         "a",
         "-tzip",

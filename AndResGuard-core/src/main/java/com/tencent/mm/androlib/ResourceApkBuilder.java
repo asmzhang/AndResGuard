@@ -1,12 +1,5 @@
 package com.tencent.mm.androlib;
 
-import com.tencent.mm.androlib.res.decoder.ARSCDecoder;
-import com.tencent.mm.resourceproguard.Configuration;
-import com.tencent.mm.resourceproguard.InputParam;
-import com.tencent.mm.util.FileOperation;
-import com.tencent.mm.util.TypedValue;
-import com.tencent.mm.util.Utils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,9 +9,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import apksigner.ApkSignerTool;
-
+import com.tencent.mm.androlib.res.decoder.ARSCDecoder;
+import com.tencent.mm.resourceproguard.Configuration;
+import com.tencent.mm.resourceproguard.InputParam;
 import static com.tencent.mm.resourceproguard.InputParam.SignatureType.SchemaV3;
+import com.tencent.mm.util.FileOperation;
+import com.tencent.mm.util.SevenZipUtil;
+import com.tencent.mm.util.TypedValue;
+import com.tencent.mm.util.Utils;
+
+import apksigner.ApkSignerTool;
 
 /**
  * @author shwenzhang
@@ -385,14 +385,34 @@ public class ResourceApkBuilder {
       FileOperation.copyFileUsingStream(new File(outputName + name), new File(storedParentName + name));
     }
     storedParentName = storedParentName + File.separator + "*";
-    String cmd = Utils.isPresent(config.m7zipPath) ? config.m7zipPath : TypedValue.COMMAND_7ZIP;
+    String cmd;
+    if (Utils.isPresent(config.m7zipPath)) {
+        cmd = config.m7zipPath;
+    } else {
+        try {
+            cmd = SevenZipUtil.getSevenZipPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            cmd = TypedValue.COMMAND_7ZIP;
+        }
+    }
     Utils.runCmd(cmd, "a", "-tzip", outSevenZipAPK.getAbsolutePath(), storedParentName, "-mx0");
   }
 
   private void generalRaw7zip(File outSevenZipApk) throws IOException, InterruptedException {
     String outPath = m7zipOutPutDir.getAbsoluteFile().getAbsolutePath();
     String path = outPath + File.separator + "*";
-    String cmd = Utils.isPresent(config.m7zipPath) ? config.m7zipPath : TypedValue.COMMAND_7ZIP;
+    String cmd;
+    if (Utils.isPresent(config.m7zipPath)) {
+        cmd = config.m7zipPath;
+    } else {
+        try {
+            cmd = SevenZipUtil.getSevenZipPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            cmd = TypedValue.COMMAND_7ZIP;
+        }
+    }
     Utils.runCmd(cmd, "a", "-tzip", outSevenZipApk.getAbsolutePath(), path, "-mx9");
   }
 }

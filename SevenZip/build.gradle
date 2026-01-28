@@ -5,6 +5,14 @@ version rootProject.ext.versionName
 group rootProject.ext.groupID
 def POM_ARTIFACT_ID = 'sevenzip'
 
+sourceSets {
+    main {
+        resources {
+            srcDir 'executable'
+        }
+    }
+}
+
 task sourcesJar(type: Jar) {
   from sourceSets.main.java.srcDirs
   classifier = 'sources'
@@ -19,8 +27,7 @@ artifacts {
   archives javadocJar
   archives sourcesJar
 }
-
-ext {
+	ext {
     // artifactId
     aarId = "sevenzip"
     // snapshot version use x.x.x-snapshot, release version use x.x.x
